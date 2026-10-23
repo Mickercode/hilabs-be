@@ -1,17 +1,393 @@
-// Models are generated from the database, never the other way round.
-//
-//   npm run db:pull     # introspect db/schema.sql into this file
-//   npm run db:generate # regenerate the client
-//
-// Do not use `prisma migrate` to change the shape of the database. Migrations are hand-written
-// SQL in db/migrations/, because the triggers and CHECKs in db/schema.sql are the research
-// design and the migration engine will drop them without saying so.
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model arm_assignment {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id       String   @unique @db.Uuid
+  arm              String
+  baseline_stratum String
+  rng_seed         String
+  assigned_at      DateTime @default(now()) @db.Timestamptz(6)
+  assigned_by      String
+  learner          learner  @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model companion_event {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id      String        @db.Uuid
+  journey_step_id String?       @db.Uuid
+  work_sample_id  String?       @db.Uuid
+  phase           String
+  type            String
+  content         String
+  resource_id     String?       @db.Uuid
+  model_id        String?
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  journey_step    journey_step? @relation(fields: [journey_step_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner         learner       @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  resource        resource?     @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  work_sample     work_sample?  @relation(fields: [work_sample_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([learner_id, created_at], map: "idx_companion_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model consent_event {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id       String   @db.Uuid
+  level            String
+  document_version String
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  learner          learner  @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([learner_id, created_at], map: "idx_consent_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model depth_event {
+  id                    String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id            String        @db.Uuid
+  task_id               String?       @db.Uuid
+  journey_step_id       String?       @db.Uuid
+  type                  String
+  value_seconds         Int?
+  idle_excluded_seconds Int?
+  detail                String?
+  created_at            DateTime      @default(now()) @db.Timestamptz(6)
+  journey_step          journey_step? @relation(fields: [journey_step_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner               learner       @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task                  task?         @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([learner_id, created_at], map: "idx_depth_learner")
+}
+
+model dispute {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id        String             @db.Uuid
+  interpretation_id String             @db.Uuid
+  text              String
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  gim_hypothesis    gim_hypothesis     @relation(fields: [interpretation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner           learner            @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dispute_response  dispute_response[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model dispute_response {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dispute_id String   @db.Uuid
+  learner_id String   @db.Uuid
+  responder  String
+  resolution String
+  text       String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  dispute    dispute  @relation(fields: [dispute_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner    learner  @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model erasure_request {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id       String?   @db.Uuid
+  learner_ref_hash String
+  requested_at     DateTime  @default(now()) @db.Timestamptz(6)
+  authorised_at    DateTime? @db.Timestamptz(6)
+  authorised_by    String?
+  completed_at     DateTime? @db.Timestamptz(6)
+  scope            String    @default("all")
+  note             String?
+
+  @@index([learner_id], map: "idx_erasure_open", where: raw("((authorised_at IS NOT NULL) AND (completed_at IS NULL))"))
+}
+
+model export_batch {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  operator     String
+  rng_seed     String
+  sample_count Int
+  note         String?
+  export_item  export_item[]
+}
+
+model export_item {
+  id                     String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  batch_id               String       @db.Uuid
+  work_sample_id         String       @db.Uuid
+  learner_id             String       @db.Uuid
+  display_code           String
+  position               Int
+  redaction_marker_count Int          @default(0)
+  created_at             DateTime     @default(now()) @db.Timestamptz(6)
+  export_batch           export_batch @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner                learner      @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  work_sample            work_sample  @relation(fields: [work_sample_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rating                 rating[]
+
+  @@unique([batch_id, display_code])
+  @@unique([batch_id, position])
+  @@index([learner_id], map: "idx_export_item_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model gim_evidence {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hypothesis_id  String         @db.Uuid
+  signal         String
+  evidence_table String
+  evidence_id    String         @db.Uuid
+  learner_id     String         @db.Uuid
+  gim_hypothesis gim_hypothesis @relation(fields: [hypothesis_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner        learner        @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([hypothesis_id, evidence_table, evidence_id, signal])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model gim_hypothesis {
+  id                   String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id           String          @db.Uuid
+  gim_type             String
+  domain               String
+  scorer_id            String          @db.Uuid
+  signal_portfolio     Int?
+  signal_trajectory    Int?
+  signal_testimony     Int?
+  signal_selfreport    Int?
+  convergence          String
+  support_profile      String
+  flavour_note         String?
+  model_version        String
+  supersedes_id        String?         @unique(map: "idx_gim_supersedes", where: raw("(supersedes_id IS NOT NULL)")) @db.Uuid
+  created_at           DateTime        @default(now()) @db.Timestamptz(6)
+  dispute              dispute[]
+  gim_evidence         gim_evidence[]
+  learner              learner         @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rater                rater           @relation(fields: [scorer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gim_hypothesis       gim_hypothesis? @relation("gim_hypothesisTogim_hypothesis", fields: [supersedes_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_gim_hypothesis gim_hypothesis? @relation("gim_hypothesisTogim_hypothesis")
+
+  @@index([learner_id, created_at], map: "idx_gim_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model journey_step {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id        String            @db.Uuid
+  phase             String
+  gim_domain        String?
+  task_id           String?           @db.Uuid
+  resource_id       String?           @db.Uuid
+  chosen_by_learner Boolean
+  started_at        DateTime          @default(now()) @db.Timestamptz(6)
+  ended_at          DateTime?         @db.Timestamptz(6)
+  companion_event   companion_event[]
+  depth_event       depth_event[]
+  learner           learner           @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  resource          resource?         @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task              task?             @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  work_sample       work_sample[]
+
+  @@index([learner_id, started_at], map: "idx_step_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model learner {
+  id                           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  goal                         String
+  joined_at                    DateTime           @default(now()) @db.Timestamptz(6)
+  study_arm                    String?
+  prior_health_care_experience Boolean?
+  withdrawn_at                 DateTime?          @db.Timestamptz(6)
+  arm_assignment               arm_assignment?
+  companion_event              companion_event[]
+  consent_event                consent_event[]
+  depth_event                  depth_event[]
+  dispute                      dispute[]
+  dispute_response             dispute_response[]
+  export_item                  export_item[]
+  gim_evidence                 gim_evidence[]
+  gim_hypothesis               gim_hypothesis[]
+  journey_step                 journey_step[]
+  rating                       rating[]
+  rating_score                 rating_score[]
+  reflection                   reflection[]
+  review_event                 review_event[]
+  testimony                    testimony[]
+  work_sample                  work_sample[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model rater {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role           String
+  calibrated_at  DateTime?        @db.Timestamptz(6)
+  notes          String?
+  gim_hypothesis gim_hypothesis[]
+  rating         rating[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model rating {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  work_sample_id String         @db.Uuid
+  learner_id     String         @db.Uuid
+  rater_id       String         @db.Uuid
+  rubric_version String
+  pass           String
+  blind          Boolean
+  export_item_id String?        @db.Uuid
+  minutes_spent  Int?
+  flavour_note   String?
+  free_note      String?
+  created_at     DateTime       @default(now()) @db.Timestamptz(6)
+  export_item    export_item?   @relation(fields: [export_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner        learner        @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rater          rater          @relation(fields: [rater_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  work_sample    work_sample    @relation(fields: [work_sample_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rating_score   rating_score[]
+
+  @@unique([work_sample_id, rater_id, pass, rubric_version])
+  @@index([work_sample_id], map: "idx_rating_sample")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model rating_score {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rating_id  String  @db.Uuid
+  dimension  Int
+  score      Int?
+  ns_code    String?
+  learner_id String  @db.Uuid
+  learner    learner @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rating     rating  @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([rating_id, dimension])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reflection {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id  String   @db.Uuid
+  prompt_type String
+  prompt_id   String
+  text        String
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  learner     learner  @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([learner_id, created_at], map: "idx_reflection_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model resource {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String
+  author           String?
+  source           String
+  url              String
+  licence          String
+  licence_version  String?
+  licence_url      String?
+  concepts         String[]
+  format           String
+  duration_minutes Int?
+  language         String?
+  origin_region    String?
+  is_practitioner  Boolean           @default(false)
+  phase_tag        String
+  has_audio_only   Boolean           @default(false)
+  has_transcript   Boolean           @default(false)
+  approx_mb        Decimal?          @db.Decimal
+  is_core          Boolean           @default(false)
+  verified_by      String
+  verified_at      DateTime          @db.Timestamptz(6)
+  companion_event  companion_event[]
+  journey_step     journey_step[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model review_event {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id    String   @db.Uuid
+  task_id       String   @db.Uuid
+  concept       String
+  interval_days Int
+  outcome       String
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  learner       learner  @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task          task     @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([learner_id, created_at], map: "idx_review_learner")
+}
+
+model schema_meta {
+  key        String   @id
+  value      String
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model task {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kind         String
+  code         String
+  gim_domain   String?
+  title        String
+  body         String
+  tier         Int            @default(0)
+  version      String
+  depth_event  depth_event[]
+  journey_step journey_step[]
+  review_event review_event[]
+  work_sample  work_sample[]
+
+  @@unique([kind, code, tier, version])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model testimony {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id     String       @db.Uuid
+  work_sample_id String?      @db.Uuid
+  author_role    String
+  author_ref     String
+  text           String
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  learner        learner      @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  work_sample    work_sample? @relation(fields: [work_sample_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([learner_id, created_at], map: "idx_testimony_learner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model work_sample {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  learner_id           String            @db.Uuid
+  task_id              String            @db.Uuid
+  journey_step_id      String?           @db.Uuid
+  content              String
+  version              Int
+  support_level        String
+  input_mode           String            @default("typed")
+  time_on_task_minutes Int?
+  conditions_note      String?
+  created_at           DateTime          @default(now()) @db.Timestamptz(6)
+  companion_event      companion_event[]
+  export_item          export_item[]
+  rating               rating[]
+  testimony            testimony[]
+  journey_step         journey_step?     @relation(fields: [journey_step_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  learner              learner           @relation(fields: [learner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task                 task              @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([learner_id, task_id, version])
+  @@index([learner_id, created_at], map: "idx_sample_learner")
 }

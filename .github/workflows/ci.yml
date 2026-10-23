@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   database:
-    name: Database invariants
+    name: Database invariants and e2e
     runs-on: ubuntu-latest
 
     services:
@@ -30,11 +30,12 @@ jobs:
           --health-retries 5
 
     env:
-      PGHOST: localhost
+      PGHOST: 127.0.0.1
       PGPORT: 5432
       PGUSER: postgres
       PGPASSWORD: postgres
       PGDATABASE: hilabs_test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/hilabs_test
 
     steps:
       - uses: actions/checkout@v4
@@ -47,8 +48,20 @@ jobs:
       - name: Run the invariant tests
         run: psql -v ON_ERROR_STOP=1 -q -f db/test_schema.sql
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+
+      # End-to-end against a real database, because most of what this API guarantees is enforced
+      # by the database rather than by application code.
+      - run: npm run test:e2e
+
   app:
-    name: Lint, types, build, test
+    name: Lint, types, build, unit tests
     runs-on: ubuntu-latest
 
     steps:
@@ -60,7 +73,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # The Prisma client is generated, not committed, and the types are needed to compile.
+      # It reads prisma/schema.prisma and needs no database.
+      - run: npx prisma generate
+
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run build
-      - run: npm test -- --passWithNoTests
+      - run: npm test
