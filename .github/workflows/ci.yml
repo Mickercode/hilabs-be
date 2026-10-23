@@ -56,6 +56,10 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
 
+      # The catalogue is the instrument: without it, Discovery has nothing to offer. Seeding here
+      # also checks that it still covers all six GIM domains, and fails the build if it does not.
+      - run: npm run db:seed
+
       # End-to-end against a real database, because most of what this API guarantees is enforced
       # by the database rather than by application code.
       - run: npm run test:e2e

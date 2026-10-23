@@ -92,6 +92,26 @@ Sessions are a token in an httpOnly cookie; only its SHA-256 digest is stored, s
 database cannot be used to impersonate anyone. Passwords use scrypt from Node's own crypto
 module — no native dependency, so `npm ci` stays a non-event on every platform.
 
+## The task catalogue
+
+`db/seed/tasks.json` is what a learner is actually asked to do: the six Discovery challenges with
+their optional extensions, and the five assessment tasks. `npm run db:seed` loads it.
+
+It is the machine-readable instrument of record. The research documents carry the design
+reasoning; the text in this file is what reaches a learner, transcribed from them verbatim. The
+rubric and the pre-registered predictions are written against this exact wording, so:
+
+- **A change to a task's wording ships as a new `version`, never as an edit to `v1`.** Two
+  learners who answered differently worded versions of the same task have not answered the same
+  task, and their scores are not comparable.
+- Seeding is idempotent, matched on `(kind, code, tier, version)`, and only ever writes to
+  `task`. It cannot disturb an observation, so it is safe on every deploy.
+- The seed fails if the six required Discovery attempts do not cover all six GIM domains. Section
+  5.2 requires that, and a silent gap would mean the pilot was not doing what it says it does.
+
+Tiers: 0 is the required first attempt every learner makes once (R5); 1 and above are optional
+extensions, offered once and never pressed. Declining one is not a gap.
+
 ## Getting started
 
 ```sh
@@ -107,7 +127,8 @@ npm run start:dev
 | Script | What it does |
 | --- | --- |
 | `npm run start:dev` | API with reload |
-| `npm run db:reset` | Drops and recreates the schema from `db/schema.sql` |
+| `npm run db:reset` | Drops and recreates the schema, then seeds the catalogue |
+| `npm run db:seed` | Loads `db/seed/tasks.json` into `task`. Idempotent |
 | `npm run db:test` | Resets, then runs the 35 invariant tests against `DATABASE_URL` |
 | `npm run test:e2e` | End-to-end against a real database |
 | `npm run staff:create` | Creates a researcher, rater or admin account |
