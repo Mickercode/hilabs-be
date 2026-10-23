@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  // Resolves the path aliases declared in tsconfig.json, including the ones
-  // added by `nest g library`.
-  plugins: [tsconfigPaths()],
+  // Vite resolves tsconfig path aliases natively, so the vite-tsconfig-paths plugin is not
+  // needed. It also peers on TypeScript 5 while this project is on 6, which left the lockfile
+  // unresolvable by `npm ci` on CI.
+  resolve: { tsconfigPaths: true },
   test: {
     globals: true,
     root: './',
