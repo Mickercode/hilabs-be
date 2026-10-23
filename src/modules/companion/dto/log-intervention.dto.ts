@@ -10,10 +10,6 @@ export const INTERVENTION_TYPES = [
 ] as const;
 
 export class LogInterventionDto {
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  learnerId!: string;
-
   @ApiProperty({ enum: ['discovery', 'osmotic', 'tailored', 'assessment'] })
   @IsIn(['discovery', 'osmotic', 'tailored', 'assessment'])
   phase!: 'discovery' | 'osmotic' | 'tailored' | 'assessment';

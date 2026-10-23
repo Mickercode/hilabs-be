@@ -291,14 +291,14 @@ SELECT must_be(
 
 -- Any future table carrying learner_id must be either an observation table or a deliberate
 -- exception. journey_step is a RECORD (ended_at is filled in later); erasure_request is the
--- audit row that outlives the learner.
+-- audit row that outlives the learner; account is a RECORD (disabled_at is set on suspension).
 SELECT must_be(
   (SELECT coalesce(string_agg(c.table_name, ', ' ORDER BY c.table_name), '')
    FROM information_schema.columns c
    WHERE c.table_schema = 'public'
      AND c.column_name = 'learner_id'
      AND c.table_name <> ALL (hilabs_observation_tables())
-     AND c.table_name NOT IN ('journey_step', 'erasure_request')
+     AND c.table_name NOT IN ('journey_step', 'erasure_request', 'account')
      AND c.table_name IN (SELECT table_name FROM information_schema.tables
                           WHERE table_schema = 'public' AND table_type = 'BASE TABLE')),
   '', 'no learner-scoped table is left unguarded');
@@ -323,6 +323,33 @@ VALUES ('11111111-1111-1111-1111-111111111111', '77777777-7777-7777-7777-7777777
 INSERT INTO review_event (learner_id, task_id, concept, interval_days, outcome)
 VALUES ('11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333',
         'C4', 3, 'recalled');
+
+-- Identity: an account with a credential and a live session, so the erasure can be shown to
+-- reach the things that let someone sign in.
+INSERT INTO account (id, kind, email, learner_id)
+VALUES ('a0000000-0000-0000-0000-00000000000a', 'learner', 'learner@example.org',
+        '11111111-1111-1111-1111-111111111111');
+INSERT INTO credential (account_id, type, secret_hash, expires_at)
+VALUES ('a0000000-0000-0000-0000-00000000000a', 'password', 'scrypt:not-a-real-hash',
+        now() + interval '30 days');
+INSERT INTO session (account_id, token_hash, expires_at)
+VALUES ('a0000000-0000-0000-0000-00000000000a', 'sha256:not-a-real-token',
+        now() + interval '7 days');
+
+SELECT must_fail(
+  $$INSERT INTO account (kind, email) VALUES ('learner', 'nobody@example.org')$$,
+  'a learner account without a learner is refused');
+
+SELECT must_fail(
+  $$INSERT INTO account (kind, email, learner_id)
+    VALUES ('researcher', 'staff@example.org', '22222222-2222-2222-2222-222222222222')$$,
+  'a staff account with a learner is refused');
+
+SELECT must_fail(
+  $$INSERT INTO account (kind, email, learner_id)
+    VALUES ('learner', 'Learner@EXAMPLE.org', '22222222-2222-2222-2222-222222222222')$$,
+  'the same address in different case is one account');
+
 
 SELECT must_fail(
   $$DELETE FROM depth_event WHERE learner_id = '11111111-1111-1111-1111-111111111111'$$,
@@ -376,6 +403,14 @@ BEGIN
   RAISE NOTICE 'pass  nothing survives an erasure, checked across % learner-scoped tables', checked;
 END;
 $$;
+
+SELECT must_be(
+  (SELECT count(*)::int FROM credential), 0,
+  'erasing a learner takes their credentials with it');
+
+SELECT must_be(
+  (SELECT count(*)::int FROM session), 0,
+  'erasing a learner takes their sessions with it, so no one stays signed in');
 
 SELECT must_be(
   (SELECT (learner_id IS NULL AND learner_ref_hash IS NOT NULL AND completed_at IS NOT NULL)

@@ -14,7 +14,7 @@ import { LogInterventionDto } from './dto/log-intervention.dto.js';
 export class CompanionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async logIntervention(dto: LogInterventionDto) {
+  async logIntervention(learnerId: string, dto: LogInterventionDto) {
     if (dto.type === 'explanation' && !dto.resourceId) {
       throw new BadRequestException(
         'An explanation must cite a library resource. The companion never explains from nowhere.',
@@ -23,7 +23,7 @@ export class CompanionService {
 
     return this.prisma.companion_event.create({
       data: {
-        learner_id: dto.learnerId,
+        learner_id: learnerId,
         phase: dto.phase,
         type: dto.type,
         content: dto.content,

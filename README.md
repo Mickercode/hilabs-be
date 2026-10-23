@@ -65,6 +65,33 @@ Onboarding must never quietly accept a field it should not have been sent (R2).
 
 Run `npm run start:dev`, then open `http://localhost:3000/docs` for the API.
 
+## Access
+
+Everything is closed by default. `SessionGuard` is registered globally, so a route added without
+thinking about access is protected rather than open — the way round that fails safe. Opening one
+takes an explicit `@Public()`.
+
+| Who | How they get an account | What they can reach |
+| --- | --- | --- |
+| Learner | Creates their own, at sign-up | Only their own record |
+| Researcher, rater, admin | `npm run staff:create`. There is no endpoint | The researcher view, and any learner record |
+
+**People create their own accounts and set their own passwords.** The team never holds anyone's
+credentials, and the consent on file is the learner's own act rather than something recorded on
+their behalf — which is what the Nigeria Data Protection Act expects of consent.
+
+Two rules worth knowing before adding an endpoint:
+
+- **A learner id never comes from a request body.** It comes from the session. Taking it from
+  the body would let one learner write into another's portfolio.
+- **Signing up is not joining the study.** `study_arm` stays null until randomisation, which
+  happens after the baseline task because assignment is balanced on that score. The 60-place cap
+  belongs at randomisation, not at the door.
+
+Sessions are a token in an httpOnly cookie; only its SHA-256 digest is stored, so a copy of the
+database cannot be used to impersonate anyone. Passwords use scrypt from Node's own crypto
+module — no native dependency, so `npm ci` stays a non-event on every platform.
+
 ## Getting started
 
 ```sh
@@ -83,6 +110,7 @@ npm run start:dev
 | `npm run db:reset` | Drops and recreates the schema from `db/schema.sql` |
 | `npm run db:test` | Resets, then runs the 35 invariant tests against `DATABASE_URL` |
 | `npm run test:e2e` | End-to-end against a real database |
+| `npm run staff:create` | Creates a researcher, rater or admin account |
 | `npm run db:pull` | Regenerates the Prisma model from the live database |
 | `npm run lint` / `npm test` / `npm run build` | As usual |
 

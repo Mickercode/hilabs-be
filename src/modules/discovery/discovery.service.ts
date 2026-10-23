@@ -14,14 +14,14 @@ export class DiscoveryService {
     });
   }
 
-  async recordDepthEvent(dto: RecordDepthEventDto) {
+  async recordDepthEvent(learnerId: string, dto: RecordDepthEventDto) {
     if (dto.type === 'time_on_task' && dto.valueSeconds === undefined) {
       throw new BadRequestException('time_on_task needs valueSeconds.');
     }
 
     return this.prisma.depth_event.create({
       data: {
-        learner_id: dto.learnerId,
+        learner_id: learnerId,
         task_id: dto.taskId ?? null,
         journey_step_id: dto.journeyStepId ?? null,
         type: dto.type,

@@ -1,5 +1,9 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Account } from '../../common/auth/current-account.decorator.js';
+import { assertCanReachLearner, requireOwnLearnerId } from '../../common/auth/scope.js';
+import type { CurrentAccount } from '../../common/auth/types.js';
+import { Roles } from '../../common/auth/roles.decorator.js';
 import { DiscoveryService } from './discovery.service.js';
 import { RecordDepthEventDto } from './dto/record-depth-event.dto.js';
 
@@ -16,8 +20,8 @@ export class DiscoveryController {
 
   @Post('depth-events')
   @ApiOperation({ summary: 'Record depth-seeking behaviour (R6)' })
-  recordDepthEvent(@Body() dto: RecordDepthEventDto) {
-    return this.discovery.recordDepthEvent(dto);
+  recordDepthEvent(@Body() dto: RecordDepthEventDto, @Account() account: CurrentAccount) {
+    return this.discovery.recordDepthEvent(requireOwnLearnerId(account), dto);
   }
 
   @Get('learners/:learnerId/summary')
@@ -26,7 +30,9 @@ export class DiscoveryController {
     summary: 'Depth-event counts for a learner',
     description: 'Researcher view only. Hidden from learners during the pilot (R16).',
   })
-  summary(@Param('learnerId') learnerId: string) {
+  @Roles('researcher', 'admin')
+  summary(@Param('learnerId') learnerId: string, @Account() account: CurrentAccount) {
+    assertCanReachLearner(account, learnerId);
     return this.discovery.summary(learnerId);
   }
 }

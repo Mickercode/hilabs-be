@@ -1,4 +1,5 @@
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 /**
@@ -11,6 +12,8 @@ import helmet from 'helmet';
  */
 export function configureApp(app: INestApplication, options: { webOrigin: string }): void {
   app.use(helmet());
+  // The session lives in an httpOnly cookie, so the guard needs it parsed.
+  app.use(cookieParser());
   app.enableCors({ origin: options.webOrigin, credentials: true });
 
   app.setGlobalPrefix('api');

@@ -14,17 +14,17 @@ export class PortfolioService {
    * The version number is allocated inside a transaction because two drafts saved at once would
    * otherwise collide on (learner, task, version).
    */
-  async addDraft(dto: AddDraftDto) {
+  async addDraft(learnerId: string, dto: AddDraftDto) {
     return this.prisma.$transaction(async (tx) => {
       const latest = await tx.work_sample.findFirst({
-        where: { learner_id: dto.learnerId, task_id: dto.taskId },
+        where: { learner_id: learnerId, task_id: dto.taskId },
         orderBy: { version: 'desc' },
         select: { version: true },
       });
 
       return tx.work_sample.create({
         data: {
-          learner_id: dto.learnerId,
+          learner_id: learnerId,
           task_id: dto.taskId,
           content: dto.content,
           version: (latest?.version ?? 0) + 1,

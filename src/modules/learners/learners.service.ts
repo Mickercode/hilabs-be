@@ -1,36 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { CreateLearnerDto } from './dto/create-learner.dto.js';
 
 @Injectable()
 export class LearnersService {
   constructor(private readonly prisma: PrismaService) {}
-
-  /**
-   * Creates the learner and their first consent event in one transaction. A learner row without
-   * a consent event would be a person we hold data about with no record of what they agreed to,
-   * which is the state the Nigeria Data Protection Act exists to prevent.
-   */
-  async create(dto: CreateLearnerDto) {
-    return this.prisma.$transaction(async (tx) => {
-      const learner = await tx.learner.create({
-        data: {
-          goal: dto.goal,
-          prior_health_care_experience: dto.priorHealthCareExperience ?? null,
-        },
-      });
-
-      await tx.consent_event.create({
-        data: {
-          learner_id: learner.id,
-          level: dto.consentLevel,
-          document_version: dto.consentDocumentVersion,
-        },
-      });
-
-      return learner;
-    });
-  }
 
   async findOne(id: string) {
     const learner = await this.prisma.learner.findUnique({ where: { id } });

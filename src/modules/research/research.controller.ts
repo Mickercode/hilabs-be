@@ -1,7 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../../common/auth/roles.decorator.js';
 import { ResearchService } from './research.service.js';
 
+// Never reachable from a learner-facing client: these endpoints expose GIM interpretations,
+// which a learner must not see during the pilot (R16).
+@Roles('researcher', 'admin')
 @ApiTags('research')
 @Controller('research')
 export class ResearchController {
