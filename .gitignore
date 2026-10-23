@@ -1,0 +1,49 @@
+# compiled output
+/dist
+/node_modules
+/build
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+*.sublime-workspace
+/.vscode/*
+!/.vscode/extensions.json
+
+# temp
+.cache
+.temp
+.tmp
+
+# local environment. This repo is public: never commit real values.
+.env
+.env.local
+.env.*.local
+
+# generated Prisma client
+/generated
+/prisma/generated
+
+# never commit a database dump or an export of learner work
+*.dump
+*.sql.gz
+/exports
+
+# TypeScript incremental build info
+*.tsbuildinfo

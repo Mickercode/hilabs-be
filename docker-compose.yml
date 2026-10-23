@@ -1,0 +1,22 @@
+# Local development database only. Production Postgres is provisioned separately, and its
+# backups are not optional: the dataset is the pilot.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hilabs-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hilabs
+    ports:
+      - "5432:5432"
+    volumes:
+      - hilabs-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  hilabs-db-data:

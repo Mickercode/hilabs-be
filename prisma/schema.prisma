@@ -1,0 +1,17 @@
+// Models are generated from the database, never the other way round.
+//
+//   npm run db:pull     # introspect db/schema.sql into this file
+//   npm run db:generate # regenerate the client
+//
+// Do not use `prisma migrate` to change the shape of the database. Migrations are hand-written
+// SQL in db/migrations/, because the triggers and CHECKs in db/schema.sql are the research
+// design and the migration engine will drop them without saying so.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
