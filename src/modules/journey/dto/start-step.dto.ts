@@ -12,10 +12,6 @@ export const GIM_DOMAINS = [
 ] as const;
 
 export class StartStepDto {
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  learnerId!: string;
-
   @ApiProperty({ enum: PHASES })
   @IsIn(PHASES as unknown as string[])
   phase!: (typeof PHASES)[number];

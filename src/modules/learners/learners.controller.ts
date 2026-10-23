@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CreateLearnerDto } from './dto/create-learner.dto.js';
+import { Account } from '../../common/auth/current-account.decorator.js';
+import { assertCanReachLearner } from '../../common/auth/scope.js';
+import type { CurrentAccount } from '../../common/auth/types.js';
 import { LearnersService } from './learners.service.js';
 
 @ApiTags('learners')
@@ -8,19 +10,11 @@ import { LearnersService } from './learners.service.js';
 export class LearnersController {
   constructor(private readonly learners: LearnersService) {}
 
-  @Post()
-  @ApiOperation({
-    summary: 'Start a journey from a question or a goal',
-    description: 'Onboarding collects no grades, school or credentials (R1, R2).',
-  })
-  create(@Body() dto: CreateLearnerDto) {
-    return this.learners.create(dto);
-  }
-
   @Get(':id')
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOperation({ summary: 'Fetch a learner' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Account() account: CurrentAccount) {
+    assertCanReachLearner(account, id);
     return this.learners.findOne(id);
   }
 
@@ -30,7 +24,8 @@ export class LearnersController {
     summary: 'Everything recorded about a learner',
     description: 'R21. Excludes interpretations, which are not shown during the pilot.',
   })
-  exportAll(@Param('id') id: string) {
+  exportAll(@Param('id') id: string, @Account() account: CurrentAccount) {
+    assertCanReachLearner(account, id);
     return this.learners.exportAll(id);
   }
 
@@ -42,7 +37,8 @@ export class LearnersController {
     description:
       'Opens a request. Nothing is deleted until it is authorised; the database refuses every delete until then (R21).',
   })
-  requestErasure(@Param('id') id: string) {
+  requestErasure(@Param('id') id: string, @Account() account: CurrentAccount) {
+    assertCanReachLearner(account, id);
     return this.learners.requestErasure(id);
   }
 }

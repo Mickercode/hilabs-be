@@ -9,10 +9,6 @@ export const DEPTH_EVENT_TYPES = [
 ] as const;
 
 export class RecordDepthEventDto {
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  learnerId!: string;
-
   @ApiPropertyOptional({ format: 'uuid' })
   @IsUUID()
   @IsOptional()

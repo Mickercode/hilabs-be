@@ -12,10 +12,6 @@ export const SUPPORT_LEVELS = [
 export class AddDraftDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
-  learnerId!: string;
-
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
   taskId!: string;
 
   @ApiProperty({ description: "The learner's own writing." })

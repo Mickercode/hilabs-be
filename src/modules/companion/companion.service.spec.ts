@@ -8,8 +8,9 @@ describe('CompanionService', () => {
   const prisma = { companion_event: { create } } as unknown as PrismaService;
   const service = new CompanionService(prisma);
 
+  const LEARNER = '11111111-1111-1111-1111-111111111111';
+
   const base: LogInterventionDto = {
-    learnerId: '11111111-1111-1111-1111-111111111111',
     phase: 'tailored',
     type: 'explanation',
     content: 'A delay separates the cause from the symptom.',
@@ -21,12 +22,12 @@ describe('CompanionService', () => {
   });
 
   it('refuses an explanation with no cited resource', async () => {
-    await expect(service.logIntervention(base)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.logIntervention(LEARNER, base)).rejects.toBeInstanceOf(BadRequestException);
     expect(create).not.toHaveBeenCalled();
   });
 
   it('accepts an explanation that cites one', async () => {
-    await service.logIntervention({
+    await service.logIntervention(LEARNER, {
       ...base,
       resourceId: '44444444-4444-4444-4444-444444444444',
     });
@@ -38,7 +39,7 @@ describe('CompanionService', () => {
   });
 
   it('allows a hint without one, because a hint explains nothing', async () => {
-    await service.logIntervention({ ...base, type: 'hint' });
+    await service.logIntervention(LEARNER, { ...base, type: 'hint' });
     expect(create).toHaveBeenCalledOnce();
   });
 });

@@ -76,6 +76,65 @@ CREATE TABLE arm_assignment (                       -- OBSERVATION
   assigned_by      TEXT NOT NULL
 );
 
+-- ---------------------------------------------------------------------------
+-- Identity
+-- ---------------------------------------------------------------------------
+--
+-- Kept apart from `learner` on purpose. `learner` carries no identifier — no name, no email, no
+-- school, no employer — which is what lets the research dataset be exported to raters and
+-- analysed without a person's contact details travelling with it.
+--
+-- The team still has to reach a learner, because the retention task lands about three weeks
+-- after the journey ends. That address lives here and is erased with the learner.
+
+CREATE TABLE account (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind         TEXT NOT NULL CHECK (kind IN ('learner', 'researcher', 'rater', 'admin')),
+  email        TEXT NOT NULL,
+  display_name TEXT,
+  -- Set only for kind='learner'. A staff account has no learner record and never gets one.
+  learner_id   UUID REFERENCES learner(id),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  disabled_at  TIMESTAMPTZ,
+  CONSTRAINT learner_account_has_a_learner
+    CHECK ((kind = 'learner') = (learner_id IS NOT NULL)),
+  CONSTRAINT one_account_per_learner UNIQUE (learner_id)
+);
+
+-- Case-insensitive, because people type their address inconsistently.
+CREATE UNIQUE INDEX idx_account_email ON account (lower(email));
+CREATE INDEX idx_account_kind ON account (kind);
+
+-- How an account proves who it is. People create their own account and set their own
+-- password, so the team never holds anyone's credentials. `type` is here so an emailed
+-- one-time code can be added later without a migration of everything that reads it.
+CREATE TABLE credential (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id  UUID NOT NULL REFERENCES account(id) ON DELETE CASCADE,
+  type        TEXT NOT NULL CHECK (type IN ('password')),
+  -- Always a hash. A code readable in the database is one copy away from being readable
+  -- everywhere.
+  secret_hash TEXT NOT NULL,
+  expires_at  TIMESTAMPTZ,
+  consumed_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_credential_account ON credential (account_id, type);
+
+CREATE TABLE session (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id UUID NOT NULL REFERENCES account(id) ON DELETE CASCADE,
+  -- The cookie holds the token; this holds only its hash, so a copy of the database cannot be
+  -- used to impersonate anyone.
+  token_hash TEXT NOT NULL UNIQUE,
+  issued_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  revoked_at TIMESTAMPTZ,
+  CONSTRAINT session_expires_after_issue CHECK (expires_at > issued_at)
+);
+CREATE INDEX idx_session_account ON session (account_id);
+CREATE INDEX idx_session_live ON session (token_hash) WHERE revoked_at IS NULL;
+
 CREATE TABLE resource (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title            TEXT NOT NULL,
@@ -510,6 +569,9 @@ BEGIN
     RAISE EXCEPTION 'no authorised, open erasure request for learner %', p_learner
       USING ERRCODE = 'integrity_constraint_violation';
   END IF;
+
+  -- Identity first: credentials and sessions cascade from the account.
+  DELETE FROM account          WHERE learner_id = p_learner;
 
   DELETE FROM rating_score     WHERE learner_id = p_learner;
   DELETE FROM rating           WHERE learner_id = p_learner;
