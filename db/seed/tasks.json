@@ -1,0 +1,261 @@
+{
+  "version": "v1",
+  "_about": [
+    "The task catalogue: what a learner is actually asked to do.",
+    "",
+    "This file is the machine-readable instrument of record. The research documents",
+    "(discovery-challenges-v1.md, assessment-tasks-v1.md) carry the design reasoning; the text",
+    "here is what reaches a learner, and it is transcribed from them verbatim. If the two ever",
+    "disagree, that is a bug in one of them and the pilot has a problem, because the rubric and",
+    "the predictions are written against this wording.",
+    "",
+    "Tiers: 0 is the required first attempt, which every learner makes once (R5). 1 and above are",
+    "optional extensions, offered once and never re-offered. The research document labels the",
+    "first extension 'Tier 2'; it is tier 1 here, because tier 0 is the required attempt. Each",
+    "title carries the document's own label so the two can be read side by side.",
+    "",
+    "Taking an extension is a depth event (R6). Declining one is not a gap and is never shown",
+    "back to the learner as one."
+  ],
+
+  "tasks": [
+    {
+      "kind": "discovery",
+      "code": "D1",
+      "tier": 0,
+      "gimDomain": "cognitive",
+      "title": "Sequences and constraints",
+      "body": "Three short items: one number sequence, one spatial-rotation item, and one constraint puzzle — five traders, five stalls, five goods, with only some of the clues.\n\nGive your answer to each, and one line on how you got there."
+    },
+    {
+      "kind": "discovery",
+      "code": "D1",
+      "tier": 1,
+      "gimDomain": "cognitive",
+      "title": "Tier 2 — three harder items",
+      "body": "Three harder items of the same three kinds."
+    },
+    {
+      "kind": "discovery",
+      "code": "D1",
+      "tier": 2,
+      "gimDomain": "cognitive",
+      "title": "Tier 3 — not enough to go on",
+      "body": "One item whose clues do not settle the answer.\n\nIf you think it cannot be settled, say so, and say what is missing."
+    },
+    {
+      "kind": "discovery",
+      "code": "D1",
+      "tier": 3,
+      "gimDomain": "cognitive",
+      "title": "Make one",
+      "body": "Write a constraint puzzle of your own that has exactly one solution, and say how you know it has only one."
+    },
+
+    {
+      "kind": "discovery",
+      "code": "D2",
+      "tier": 0,
+      "gimDomain": "analytical",
+      "title": "What the table does not say",
+      "body": "Below is a small table of monthly figures for two clinics, under the headline \"Clinic B is outperforming Clinic A\".\n\nDoes the headline hold? Say why or why not."
+    },
+    {
+      "kind": "discovery",
+      "code": "D2",
+      "tier": 1,
+      "gimDomain": "analytical",
+      "title": "Tier 2 — one more column",
+      "body": "The same table, with a third column added that reverses the apparent conclusion.\n\nWhat do you make of it now?"
+    },
+    {
+      "kind": "discovery",
+      "code": "D2",
+      "tier": 2,
+      "gimDomain": "analytical",
+      "title": "Tier 3 — what would you need to see?",
+      "body": "What would you need to see to decide? List the data you would ask for."
+    },
+    {
+      "kind": "discovery",
+      "code": "D2",
+      "tier": 3,
+      "gimDomain": "analytical",
+      "title": "Make one",
+      "body": "Present the same numbers in a way that supports the opposite headline, honestly. Then say what the presentation did."
+    },
+
+    {
+      "kind": "discovery",
+      "code": "D3",
+      "tier": 0,
+      "gimDomain": "creative",
+      "title": "Design something for someone who cannot use what exists",
+      "body": "A trader who does not read or write runs credit for about forty regular customers, and currently keeps it all in memory.\n\nDesign a way for her to keep the records herself, without writing. It does not need to involve a phone. Sketch it, describe it, or explain it aloud.\n\nThere is no correct answer to this one."
+    },
+    {
+      "kind": "discovery",
+      "code": "D3",
+      "tier": 1,
+      "gimDomain": "creative",
+      "title": "Tier 2 — hand it over",
+      "body": "Now she needs to hand the system to her daughter for a week. What changes?"
+    },
+    {
+      "kind": "discovery",
+      "code": "D3",
+      "tier": 2,
+      "gimDomain": "creative",
+      "title": "Tier 3 — the worst failure",
+      "body": "What is the worst failure your design can have, and what in the design makes that failure likely?"
+    },
+    {
+      "kind": "discovery",
+      "code": "D3",
+      "tier": 3,
+      "gimDomain": "creative",
+      "title": "Make one",
+      "body": "Write a brief of the same shape for a constraint from your own life, and attempt it."
+    },
+
+    {
+      "kind": "discovery",
+      "code": "D4",
+      "tier": 0,
+      "gimDomain": "emotional",
+      "title": "The union, the drivers and the passengers",
+      "body": "Four people in a transport dispute have each given a short statement. Each is partly right, and each leaves something out.\n\nWrite what each party actually needs, as distinct from what each is demanding."
+    },
+    {
+      "kind": "discovery",
+      "code": "D4",
+      "tier": 1,
+      "gimDomain": "emotional",
+      "title": "Tier 2 — they reply",
+      "body": "Two of the four have read your account and replied. One of them is not pleased.\n\nRespond to them."
+    },
+    {
+      "kind": "discovery",
+      "code": "D4",
+      "tier": 2,
+      "gimDomain": "emotional",
+      "title": "Tier 3 — what nobody will say",
+      "body": "Name the thing none of the four will say out loud, and say what in their statements led you to it."
+    },
+    {
+      "kind": "discovery",
+      "code": "D4",
+      "tier": 3,
+      "gimDomain": "emotional",
+      "title": "Make one",
+      "body": "Describe a dispute you have watched, with each side's position set out as its holder would state it."
+    },
+
+    {
+      "kind": "discovery",
+      "code": "D5",
+      "tier": 0,
+      "gimDomain": "adaptive",
+      "title": "Learn Kaya",
+      "body": "Kaya is a way of writing down a sequence of trades. Nobody is going to tell you its rules: the worked examples below are all you get.\n\nRead them, then write three trades of your own in Kaya."
+    },
+    {
+      "kind": "discovery",
+      "code": "D5",
+      "tier": 1,
+      "gimDomain": "adaptive",
+      "title": "Tier 2 — the rules change",
+      "body": "Here is another worked example. It contradicts what you worked out: one symbol does not mean what you thought.\n\nRewrite your three trades."
+    },
+    {
+      "kind": "discovery",
+      "code": "D5",
+      "tier": 2,
+      "gimDomain": "adaptive",
+      "title": "Tier 3 — state the rules",
+      "body": "State the rules of Kaya in your own words, including the one that changed, and say what you think the change was for."
+    },
+    {
+      "kind": "discovery",
+      "code": "D5",
+      "tier": 3,
+      "gimDomain": "adaptive",
+      "title": "Make one",
+      "body": "Extend Kaya with a symbol it needs and does not have, and justify it."
+    },
+
+    {
+      "kind": "discovery",
+      "code": "D6",
+      "tier": 0,
+      "gimDomain": "instinctive",
+      "title": "Ninety seconds",
+      "body": "You are the dispatcher. Three vehicles are available. You know some of what each is carrying and roughly where each is, and not the rest.\n\nSend one. You have ninety seconds, and then the choice locks.\n\nAfterwards, with no time limit, write why you chose as you did."
+    },
+    {
+      "kind": "discovery",
+      "code": "D6",
+      "tier": 1,
+      "gimDomain": "instinctive",
+      "title": "Tier 2 — one more fact",
+      "body": "Here is a fact you did not have, now that you have committed.\n\nDoes it change your choice? Why?"
+    },
+    {
+      "kind": "discovery",
+      "code": "D6",
+      "tier": 2,
+      "gimDomain": "instinctive",
+      "title": "Tier 3 — what you could not have justified",
+      "body": "What did you decide on that you could not have justified in the moment?"
+    },
+    {
+      "kind": "discovery",
+      "code": "D6",
+      "tier": 3,
+      "gimDomain": "instinctive",
+      "title": "Make one",
+      "body": "Describe a decision you made under pressure, and what you now think you were actually reading."
+    },
+
+    {
+      "kind": "assessment",
+      "code": "B",
+      "tier": 0,
+      "gimDomain": null,
+      "title": "The street trading ban",
+      "body": "A city government banned street trading along a major road, to ease traffic. For about a month, journey times along the road fell by roughly a quarter. Six months later, journey times along the same road were longer than before the ban, and the narrow side streets behind the road had become almost impassable. Traders say most of them are still working, and enforcement officers report that the heaviest congestion now happens on the two days a week when they are not on duty.\n\nExplain what might be going on, and say what you would do about it. Explain your reasoning as you go."
+    },
+    {
+      "kind": "assessment",
+      "code": "N",
+      "tier": 0,
+      "gimDomain": null,
+      "title": "The prepaid water meters",
+      "body": "A water utility replaced household billing with prepaid meters, to cut unpaid bills. In the first three months, the share of water that was paid for rose from about 55% to about 80%. A year later, the utility's total revenue was below what it had been before the change, and the number of reported burst pipes had roughly doubled. The utility has the same number of repair crews it had before. Its managers note that the fall in revenue is sharpest in the districts where collection improved most.\n\nExplain what might be going on, and say what you would do about it. Explain your reasoning as you go."
+    },
+    {
+      "kind": "assessment",
+      "code": "F",
+      "tier": 0,
+      "gimDomain": null,
+      "title": "The clinic's stronger antibiotic",
+      "body": "A district clinic was seeing more infections that did not respond to its usual antibiotic, so it made a stronger, broader antibiotic its standard first treatment. Over the next two seasons, the share of patients whose infection cleared on the first course rose from about 70% to about 90%. Two years on, the clinic is seeing more infections that respond to neither antibiotic than it was seeing resistant cases before the change, and average treatment now takes longer than it used to. The clinic has not changed its referral arrangements, and the one hospital it can refer to is four hours away. Clinicians have noticed that the hardest cases come disproportionately from the two communities nearest the clinic, which are also the two that use it most.\n\nExplain what might be going on, and say what you would do about it. Explain your reasoning as you go."
+    },
+    {
+      "kind": "assessment",
+      "code": "D",
+      "tier": 0,
+      "gimDomain": null,
+      "title": "The cooperative's fertiliser credit",
+      "body": "A farming cooperative began supplying members with fertiliser on credit, repayable after harvest. In the first season, members' average yields rose by about a third. By the third season, the cooperative's loan book had grown faster than its members' harvest income, several members had left owing money, and the land of the longest-standing members was producing less than it had before the scheme. The cooperative has the same two extension officers it started with. Members who took the largest credit lines are the ones leaving.\n\nExplain what might be going on, and say what you would do about it. Explain your reasoning as you go."
+    },
+    {
+      "kind": "assessment",
+      "code": "P",
+      "tier": 0,
+      "gimDomain": null,
+      "title": "Your own system",
+      "body": "Choose something you know from the inside that behaves in a way people around you find frustrating or puzzling: it resists being fixed, or a fix made it worse, or it keeps returning to the same state.\n\nDescribe how it actually works, not how it is supposed to. Then propose one change, say what you expect it to do, and say what side effects you would watch for and why.\n\nNo topic is too small. A trader's stock-and-credit cycle is as good a system as a ministry's."
+    }
+  ]
+}

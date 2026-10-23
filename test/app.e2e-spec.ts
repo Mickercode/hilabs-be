@@ -175,6 +175,43 @@ describe('HiLabs API (e2e)', () => {
     });
   });
 
+  describe('the task catalogue', () => {
+    it('offers six Discovery challenges, one in each kind of thinking', async () => {
+      const { agent } = await signUp();
+      const res = await agent.get('/api/v1/discovery/challenges').expect(200);
+
+      const required = (res.body as Array<{ tier: number; code: string; gim_domain: string }>)
+        .filter((task) => task.tier === 0);
+
+      expect(required).toHaveLength(6);
+      expect(required.map((t) => t.code).sort()).toEqual(['D1', 'D2', 'D3', 'D4', 'D5', 'D6']);
+
+      // Section 5.2 asks Discovery to expose a learner to all six domains. A gap is not a
+      // cosmetic problem: the pilot would not be doing what it says it does.
+      expect(new Set(required.map((t) => t.gim_domain))).toEqual(
+        new Set(['cognitive', 'analytical', 'creative', 'emotional', 'adaptive', 'instinctive']),
+      );
+    });
+
+    it('carries optional extensions beyond the required attempt', async () => {
+      const { agent } = await signUp();
+      const res = await agent.get('/api/v1/discovery/challenges').expect(200);
+
+      const extensions = (res.body as Array<{ tier: number }>).filter((task) => task.tier > 0);
+      expect(extensions.length).toBeGreaterThan(0);
+    });
+
+    it('gives every task a body a learner could actually answer', async () => {
+      const { agent } = await signUp();
+      const res = await agent.get('/api/v1/discovery/challenges').expect(200);
+
+      for (const task of res.body as Array<{ title: string; body: string }>) {
+        expect(task.title.length).toBeGreaterThan(0);
+        expect(task.body.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
   describe('signing in and out', () => {
     it('signs in with the password that was set, and not with another', async () => {
       const { email } = await signUp();

@@ -20,11 +20,12 @@
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "db:reset": "node scripts/db-reset.mjs",
+    "db:reset": "node scripts/db-reset.mjs && npm run db:seed",
     "db:test": "node scripts/db-reset.mjs --test",
     "db:pull": "prisma db pull",
     "db:generate": "prisma generate",
-    "staff:create": "npm run build && node scripts/create-staff.mjs"
+    "staff:create": "npm run build && node scripts/create-staff.mjs",
+    "db:seed": "node scripts/seed.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
